@@ -11,24 +11,8 @@ const calls = [
 
 const parseLines = async () => {
   const data = await fs.readFile("./data.txt", { encoding: "utf-8" });
-  // console.log(data.split("\n"));
   const formatData = data.split("\n").join(" ").split(",");
-
   return formatData;
-};
-
-const formatBoard = (board) => {
-  console.log(board);
-  const formattedBoard = board.split(" ").filter((ele) => ele.length > 0);
-  console.log(formattedBoard);
-  const rowsAndColumns = [];
-
-  for (let i = 0; i < 5; i++) {
-    const number = i * 5;
-    rowsAndColumns.push(formattedBoard.slice(number, number + 5));
-  }
-
-  return rowsAndColumns;
 };
 
 const formatData = (data) => {
@@ -37,44 +21,60 @@ const formatData = (data) => {
   for (let board of data) {
     boards.push(formatBoard(board));
   }
-
   return boards;
+};
+
+const formatBoard = (board) => {
+  const formattedBoard = board.split(" ").filter((ele) => ele.length > 0);
+  const rowsAndColumns = [];
+
+  for (let i = 0; i < 5; i++) {
+    const index = i * 5;
+    rowsAndColumns.push(formattedBoard.slice(index, index + 5));
+  }
+  return { won: false, board: rowsAndColumns, call: null };
 };
 
 const callLoop = (boards, calls) => {
   const allWinners = [];
 
   for (let call of calls) {
-    const winner = checkIfBoardWon(boards, call);
+    const winners = checkIfABoardWon(boards, call);
 
-    if (winner) {
-      if (call === 13) {
-        // console.log(allWinners);
-      }
-      // console.log(winner);
-      allWinners.push(calculateBoard(winner, call));
+    if (winners) {
+      winners.forEach((winner) =>
+        allWinners.push(calculateBoard(winner, call))
+      );
     }
   }
-  // console.log("ALL WINNER!!!!", allWinners);
   return allWinners;
 };
 
-const checkIfBoardWon = (boards, call) => {
+const checkIfABoardWon = (boards, call) => {
+  const winners = [];
   for (let board of boards) {
+    // console.log(board);
+    if (board.won) {
+      //don't stamp a board if it has already won.
+      continue;
+    }
     const addedValue = stampCall(board, call);
 
     if (addedValue) {
-      const checkWin = didWin(board, addedValue, call);
+      const checkWin = didWin(board, call);
       if (checkWin) {
-        return board;
+        winners.push(board);
       }
     }
   }
 
-  return false;
+  if (winners.length) {
+    return winners;
+  } else return false;
 };
 
-const stampCall = (board, call) => {
+const stampCall = (boardObj, call) => {
+  const board = boardObj.board;
   for (let x = 0; x < board.length; x++) {
     const row = board[x];
     for (let y = 0; y < row.length; y++) {
@@ -82,7 +82,7 @@ const stampCall = (board, call) => {
 
       if (cell == call) {
         row[y] = true;
-        return [x, y];
+        return true;
       }
     }
   }
@@ -90,7 +90,8 @@ const stampCall = (board, call) => {
   return false;
 };
 
-const didWin = (board, [row, column], call) => {
+const didWin = (boardObj, call) => {
+  const board = boardObj.board;
   // let rowWon = true;
   // let columnWon = true;
 
@@ -124,6 +125,8 @@ const didWin = (board, [row, column], call) => {
       }
     }
     if (didRowWin) {
+      boardObj.won = true;
+      boardObj.call = call;
       return true;
     }
   }
@@ -142,7 +145,8 @@ const didWin = (board, [row, column], call) => {
     }
 
     if (didColumnWin) {
-      // console.log("huh?!??!?!?!");
+      boardObj.won = true;
+      boardObj.call = call;
       return true;
     }
   }
@@ -150,7 +154,8 @@ const didWin = (board, [row, column], call) => {
   return false;
 };
 
-const calculateBoard = (board, call) => {
+const calculateBoard = (boardObj, call) => {
+  const board = boardObj.board;
   let sum = 0;
 
   for (let row of board) {
@@ -160,38 +165,49 @@ const calculateBoard = (board, call) => {
       }
     }
   }
-
+  console.log(boardObj);
+  console.log(sum * call);
   return sum * call;
 };
 
-const data = parseLines()
-  .then(formatData)
+parseLines()
+  .then((data) => formatData(data))
   .then((data) => callLoop(data, calls));
 
 const theirBoards = [
-  // [
-  //   [22, 13, 17, 11, 0],
-  //   [8, 2, 23, 4, 24],
-  //   [21, 9, 14, 16, 7],
-  //   [6, 10, 3, 18, 5],
-  //   [1, 12, 20, 15, 19],
-  // ],
-
-  [
-    [3, 15, 0, 2, 22],
-    [9, 18, 13, 17, 5],
-    [19, 8, 7, 25, 23],
-    [20, 11, 10, 24, 4],
-    [14, 21, 16, 12, 6],
-  ],
-
-  // [
-  //   [14, 21, 17, 24, 4],
-  //   [10, 16, 15, 9, 19],
-  //   [18, 8, 23, 26, 20],
-  //   [22, 11, 13, 6, 5],
-  //   [2, 0, 12, 3, 7],
-  // ],
+  {
+    won: false,
+    board: [
+      [22, 13, 17, 11, 0],
+      [8, 2, 23, 4, 24],
+      [21, 9, 14, 16, 7],
+      [6, 10, 3, 18, 5],
+      [1, 12, 20, 15, 19],
+    ],
+    call: null,
+  },
+  {
+    won: false,
+    board: [
+      [3, 15, 0, 2, 22],
+      [9, 18, 13, 17, 5],
+      [19, 8, 7, 25, 23],
+      [20, 11, 10, 24, 4],
+      [14, 21, 16, 12, 6],
+    ],
+    call: null,
+  },
+  {
+    won: false,
+    board: [
+      [14, 21, 17, 24, 4],
+      [10, 16, 15, 9, 19],
+      [18, 8, 23, 26, 20],
+      [22, 11, 13, 6, 5],
+      [2, 0, 12, 3, 7],
+    ],
+    call: null,
+  },
 ];
 
 const theirCalls = [
@@ -205,4 +221,4 @@ const theirCalls = [
 // t t t t  t
 // t t t t  t
 
-callLoop(theirBoards, theirCalls);
+// callLoop(theirBoards, theirCalls);
