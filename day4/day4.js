@@ -11,13 +11,16 @@ const calls = [
 
 const parseLines = async () => {
   const data = await fs.readFile("./data.txt", { encoding: "utf-8" });
+  // console.log(data.split("\n"));
   const formatData = data.split("\n").join(" ").split(",");
 
   return formatData;
 };
 
 const formatBoard = (board) => {
+  console.log(board);
   const formattedBoard = board.split(" ").filter((ele) => ele.length > 0);
+  console.log(formattedBoard);
   const rowsAndColumns = [];
 
   for (let i = 0; i < 5; i++) {
@@ -45,10 +48,14 @@ const callLoop = (boards, calls) => {
     const winner = checkIfBoardWon(boards, call);
 
     if (winner) {
+      if (call === 13) {
+        // console.log(allWinners);
+      }
+      // console.log(winner);
       allWinners.push(calculateBoard(winner, call));
     }
   }
-
+  // console.log("ALL WINNER!!!!", allWinners);
   return allWinners;
 };
 
@@ -84,28 +91,61 @@ const stampCall = (board, call) => {
 };
 
 const didWin = (board, [row, column], call) => {
-  let rowWon = true;
-  let columnWon = true;
+  // let rowWon = true;
+  // let columnWon = true;
 
-  for (let i = 0; i < 5; i++) {
-    const cell = board[row][i];
-    if (cell !== true) {
-      rowWon = false;
-      break;
+  // for (let i = 0; i < 5; i++) {
+  //   const cell = board[row][i];
+  //   if (cell !== true) {
+  //     rowWon = false;
+  //     break;
+  //   }
+  // }
+
+  // if (rowWon) return true;
+
+  // for (let i = 0; i < 5; i++) {
+  //   const cell = board[i][column];
+  //   if (cell !== true) {
+  //     columnWon = false;
+  //     break;
+  //   }
+  // }
+
+  // if (columnWon) return true;
+  for (let i = 0; i < board.length; i++) {
+    const row = board[i];
+    let didRowWin = true;
+    for (let j = 0; j < row.length; j++) {
+      const value = board[i][j];
+      if (value !== true) {
+        didRowWin = false;
+        break;
+      }
+    }
+    if (didRowWin) {
+      return true;
     }
   }
 
-  if (rowWon) return true;
+  for (let i = 0; i < board[0].length; i++) {
+    let didColumnWin = true;
+    for (let j = 0; j < board.length; j++) {
+      const column = board[j][i];
+      if (call === 13) {
+        // console.log(column, i);
+      }
+      if (column !== true) {
+        didColumnWin = false;
+        break;
+      }
+    }
 
-  for (let i = 0; i < 5; i++) {
-    const cell = board[i][column];
-    if (cell !== true) {
-      columnWon = false;
-      break;
+    if (didColumnWin) {
+      // console.log("huh?!??!?!?!");
+      return true;
     }
   }
-
-  if (columnWon) return true;
 
   return false;
 };
@@ -129,13 +169,13 @@ const data = parseLines()
   .then((data) => callLoop(data, calls));
 
 const theirBoards = [
-  [
-    [22, 13, 17, 11, 0],
-    [8, 2, 23, 4, 24],
-    [21, 9, 14, 16, 7],
-    [6, 10, 3, 18, 5],
-    [1, 12, 20, 15, 19],
-  ],
+  // [
+  //   [22, 13, 17, 11, 0],
+  //   [8, 2, 23, 4, 24],
+  //   [21, 9, 14, 16, 7],
+  //   [6, 10, 3, 18, 5],
+  //   [1, 12, 20, 15, 19],
+  // ],
 
   [
     [3, 15, 0, 2, 22],
@@ -145,13 +185,13 @@ const theirBoards = [
     [14, 21, 16, 12, 6],
   ],
 
-  [
-    [14, 21, 17, 24, 4],
-    [10, 16, 15, 9, 19],
-    [18, 8, 23, 26, 20],
-    [22, 11, 13, 6, 5],
-    [2, 0, 12, 3, 7],
-  ],
+  // [
+  //   [14, 21, 17, 24, 4],
+  //   [10, 16, 15, 9, 19],
+  //   [18, 8, 23, 26, 20],
+  //   [22, 11, 13, 6, 5],
+  //   [2, 0, 12, 3, 7],
+  // ],
 ];
 
 const theirCalls = [

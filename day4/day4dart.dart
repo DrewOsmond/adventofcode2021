@@ -144,7 +144,26 @@ void main() {
     }
   }
 
-  callLoop(board);
+  // callLoop(board);
+
+  Test value1 = Test(name: "drew", lastName: "osmond");
+  TestTwo value2 = TestTwo("drew", "osmond");
+  print(value1.name);
+  print(value2.name);
+}
+
+class Test {
+  String name;
+  String lastName;
+
+  Test({required this.name, required this.lastName});
+}
+
+class TestTwo {
+  String name;
+  String lastName;
+
+  TestTwo(this.name, this.lastName);
 }
 
 // [
